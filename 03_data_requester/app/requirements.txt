@@ -1,6 +1,24 @@
 asyncio==3.4.3
 aiohttp==3.7.4.post0
 configloader==1.0.1
-faust[rocksdb, fast, uvloop]==1.10.4
 prometheus-client===0.11.0
-PyYAML==5.4.1
+faust==1.10.4
+PyYAML
+
+# PyYAML==5.4.1
+
+# faust[rocksdb, fast, uvloop]==1.10.4
+#
+# In the Faust Python stream processing library, fast, uvloop, and rocksdb are key components that contribute 
+# to performance and functionality. fast bundles C-speedup extensions, uvloop provides a fast event loop for 
+# asynchronous operations, and rocksdb is a high-performance key-value store used for table storage. 
+# 
+# fast:    This Faust extension provides a set of C-based speedup extensions that optimize various aspects of the 
+#          Faust core for improved processing performance. 
+# uvloop:  uvloop is an asyncio event loop implementation designed for speed. It's built on top of libuv, the same 
+#          library that powers Node.js, making it very efficient for asynchronous tasks. Faust can use uvloop for 
+#          enhanced asynchronous operations in its stream processing pipelines. 
+# rocksdb: RocksDB is a C++-based, embedded, and persistent key-value store known for its speed and efficiency. 
+#          Faust uses it as the storage engine for "tables," which are distributed key-value stores used to persist 
+#          state within stream processing applications. This allows Faust to store and manage data efficiently, 
+#          enabling features like fault tolerance and resuming previous processing pipelines. 
