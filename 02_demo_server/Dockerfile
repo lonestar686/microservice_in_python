@@ -13,6 +13,11 @@ COPY ./app /app
 RUN pip install --upgrade pip
 RUN pip install -r /app/requirements.txt
 
-ENV HOST 0.0.0.0
-ENV PORT 8002
+ENV HOST=0.0.0.0
+ENV PORT=8002
+
+# see CMD details in https://docs.docker.com/reference/dockerfile/#cmd
+# shell form
 CMD uvicorn main:app --reload --host $HOST --port $PORT
+# exec form
+# CMD ["uvicorn", "main:app", "--reload", "--host", "$HOST", "--port", "$PORT"]
