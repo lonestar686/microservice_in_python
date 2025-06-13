@@ -42,7 +42,7 @@ services:
     depends_on:
       - kafka
     volumes:
-      - ./01_infrastructure/docker:/tmp/wait-for-it.sh
+      - ./01_infrastructure/docker:/tmp
     command: |
       bash -c '/tmp/wait-for-it.sh --timeout=0 -s kafka:9092 && \
       kafka-topics --create --if-not-exists --topic src-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
