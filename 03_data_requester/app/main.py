@@ -17,9 +17,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 logger.info(f"######## broker info: {config.get(config_loader.KAFKA_BROKER)}")
+logger.info(f"######## web_host info: {config.get(config_loader.WEB_HOST)}")
+logger.info(f"######## web_port info: {config.get(config_loader.WEB_PORT)}")
 
-app = faust.App(SERVICE_NAME, broker=config.get(config_loader.KAFKA_BROKER), value_serializer='raw',
-                web_host=config.get(config_loader.WEB_HOST), web_port=config.get(config_loader.WEB_PORT))
+app = faust.App(SERVICE_NAME, 
+                broker=config.get(config_loader.KAFKA_BROKER),
+                value_serializer='raw',
+                web_host=config.get(config_loader.WEB_HOST),
+                web_port=config.get(config_loader.WEB_PORT))
+
 src_data_topic = app.topic(config.get(config_loader.SRC_DATA_TOPIC), partitions=8)
 
 
