@@ -2,6 +2,7 @@
 services:
   kafka:
     image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    user: root
     depends_on:
       - zookeeper
     ports:
@@ -24,7 +25,7 @@ services:
       KAFKA_SOCKET_REQUEST_MAX_BYTES: 100001200
     restart: always
     volumes:
-      - ./kafka-data:/var/lib/kafka/data
+      - ./run/kafka-data:/var/lib/kafka/data
 
   zookeeper:
     image: zookeeper:${ZK_VERSION}
@@ -32,17 +33,18 @@ services:
       - ${ZK_PORT}:2181
     restart: always
     volumes:
-      - ./zk-data:/var/lib/zookeeper/data \
-      - ./zk-txn-logs:/var/lib/zookeeper/log \
+      - ./run/zk-data:/var/lib/zookeeper/data \
+      - ./run/zk-txn-logs:/var/lib/zookeeper/log \
 
   kafka-actualizer:
     image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    user: root
     depends_on:
       - kafka
     volumes:
-      - ./01_infrastructure/docker/wait-for-it.sh:/wait-for-it.sh
+      - ./01_infrastructure/docker:/tmp/wait-for-it.sh
     command: |
-      bash -c '/wait-for-it.sh --timeout=0 -s kafka:9092 && \
+      bash -c '/tmp/wait-for-it.sh --timeout=0 -s kafka:9092 && \
       kafka-topics --create --if-not-exists --topic src-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
       kafka-topics --create --if-not-exists --topic processed-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
       kafka-topics --create --if-not-exists --topic aggregated-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
@@ -59,7 +61,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - ./postgres-data:/var/lib/postgresql
+      - ./run/postgres-data:/var/lib/postgresql
     ports:
       - ${PG_PORT}:5432
 
@@ -67,7 +69,7 @@ services:
     image: chorss/docker-pgadmin4
     restart: always
     volumes:
-      - ./pgadmin:/data
+      - ./run/pgadmin:/tmp
     ports:
       - ${PG_ADMIN_PORT}:5050
     depends_on:
@@ -87,8 +89,8 @@ services:
     ports:
       - ${GRAFANA_PORT}:3000
     volumes:
-      - ./grafana-data/data:/var/lib/grafana
-      - ./grafana-data/certs:/certs
+      - ./run/grafana-data/data:/var/lib/grafana
+      - ./run/grafana-data/certs:/certs
       - ./01_infrastructure/grafana/provisioning:/etc/grafana/provisioning
       - ./01_infrastructure/grafana/dashboards:/var/lib/grafana/dashboards
     environment:
@@ -110,22 +112,22 @@ services:
   data_requester:
     build:
       context: ./03_data_requester
-    restart: always
+    restart: no
     depends_on:
       - kafka-actualizer
     ports:
       - ${DATA_REQUESTER_PORT}:8003
       - ${DATA_REQUESTER_STATS_PORT}:7003
     environment:
-      - DATA_PROCESSOR_WEB_HOST=0.0.0.0
-      - DATA_PROCESSOR_WEB_PORT=8003
+      - DATA_REQUESTER_WEB_HOST=0.0.0.0
+      - DATA_REQUESTER_WEB_PORT=8003
       - DATA_REQUESTER_KAFKA_BROKER=kafka:9092
       - DATA_REQUESTER_BASE_URL=http://demo_server:8002/pairs
 
   data_processor:
     build:
       context: ./04_data_processor
-    restart: always
+    restart: no
     depends_on:
       - kafka-actualizer
     ports:
@@ -139,7 +141,7 @@ services:
   data_aggregator:
     build:
       context: ./05_data_aggregator
-    restart: always
+    restart: no
     depends_on:
       - kafka-actualizer
     ports:
@@ -153,7 +155,7 @@ services:
   db_loader:
     build:
       context: ./06_db_loader
-    restart: always
+    restart: no
     depends_on:
       - kafka-actualizer
     ports:
@@ -168,7 +170,7 @@ services:
   api_gateway:
     build:
       context: ./07_api_gateway
-    restart: always
+    restart: no
     depends_on:
       - kafka-actualizer
     ports:
